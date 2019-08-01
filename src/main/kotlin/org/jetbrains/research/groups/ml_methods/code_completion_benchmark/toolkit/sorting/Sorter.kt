@@ -6,7 +6,6 @@ import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.openapi.util.Pair
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
-import org.jetbrains.research.groups.ml_methods.code_completion_benchmark.toolkit.model.ModelRunner
 
 abstract class Sorter : CompletionFinalSorter() {
     protected open fun getPsiElementByParameters(parameters: CompletionParameters): PsiElement {
@@ -16,8 +15,6 @@ abstract class Sorter : CompletionFinalSorter() {
     protected open fun getOpenFileByParameters(parameters: CompletionParameters): PsiFile {
         return parameters.originalFile
     }
-
-    protected abstract fun getModelService(): ModelRunner<*>
 
     protected abstract fun rankCompletions(
             completions: MutableIterable<LookupElement>,

@@ -6,8 +6,6 @@ interface ModelRunnerProvider {
     fun getModelRunners(): Array<Class<*>>
 
     companion object {
-        val EP_NAME = ExtensionPointName.create<ModelRunnerProvider>(
-            "code_completion_benchmark.completion.modelRunnerProvider"
-        )
+        val EP_NAME = ExtensionPointName.create<ModelRunnerProvider>("code-completion-benchmark-toolkit.modelRunnerProvider")
     }
 }
