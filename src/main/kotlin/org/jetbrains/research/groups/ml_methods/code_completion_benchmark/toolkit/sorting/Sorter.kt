@@ -3,13 +3,21 @@ package org.jetbrains.research.groups.ml_methods.code_completion_benchmark.toolk
 import com.intellij.codeInsight.completion.CompletionFinalSorter
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.lookup.LookupElement
-
-import org.jetbrains.research.groups.ml_methods.code_completion_benchmark.toolkit.services.ModelRunnerRegistrar
+import com.intellij.openapi.util.Pair
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
+import org.jetbrains.research.groups.ml_methods.code_completion_benchmark.toolkit.model.ModelRunner
 
 abstract class Sorter : CompletionFinalSorter() {
-    abstract val sorterID: String
+    protected open fun getPsiElementByParameters(parameters: CompletionParameters): PsiElement {
+        return parameters.originalPosition ?: return parameters.position
+    }
 
-    val modelService = ModelRunnerRegistrar.getInstance().registeredRunners.findLast { it.id == sorterID }
+    protected open fun getOpenFileByParameters(parameters: CompletionParameters): PsiFile {
+        return parameters.originalFile
+    }
+
+    protected abstract fun getModelService(): ModelRunner<*>
 
     protected abstract fun rankCompletions(
             completions: MutableIterable<LookupElement>,
@@ -18,5 +26,9 @@ abstract class Sorter : CompletionFinalSorter() {
 
     override fun sort(items: MutableIterable<LookupElement>, parameters: CompletionParameters): MutableIterable<LookupElement> {
         return rankCompletions(items, parameters) ?: return items
+    }
+
+    override fun getRelevanceObjects(elements: MutableIterable<LookupElement>): MutableMap<LookupElement, MutableList<Pair<String, Any>>> {
+        return mutableMapOf()
     }
 }
