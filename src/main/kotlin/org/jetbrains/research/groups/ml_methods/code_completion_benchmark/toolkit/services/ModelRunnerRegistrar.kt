@@ -10,6 +10,9 @@ import org.jetbrains.research.groups.ml_methods.code_completion_benchmark.toolki
 
 import java.util.function.Supplier
 
+/**
+ * Service that instantiates model runners specified in [ModelRunnerProvider.getModelRunners] implementations.
+ */
 object ModelRunnerRegistrar {
 
     private val LOG = Logger.getInstance(
@@ -20,16 +23,30 @@ object ModelRunnerRegistrar {
         val providers = HashSet<ModelRunnerProvider>()
         providers.addAll(ModelRunnerProvider.EP_NAME.extensionList)
 
-        val factories = ArrayList<Supplier<ModelRunner<*>>>()
+        val factories = ArrayList<Supplier<ModelRunner>>()
         registerModelRunners(providers, factories)
 
         factories
     }
 
-    val registeredRunners by lazy { createModelRunners() }
+    private val registeredRunners by lazy { createModelRunners() }
 
     fun getInstance(): ModelRunnerRegistrar {
         return ServiceManager.getService(ModelRunnerRegistrar::class.java)
+    }
+
+    /**
+     * Use to get required runner by ID.
+     */
+    fun getRunnerById(id: String): ModelRunner? {
+        return getInstance().registeredRunners.find { it.id == id }
+    }
+
+    /**
+     * Use to access all available model runners.
+     */
+    fun getAvailableRunners(): List<ModelRunner> {
+        return getInstance().registeredRunners
     }
 
     private fun <T> instantiateModelRunner(runnerClass: Class<T>): T? {
@@ -43,20 +60,20 @@ object ModelRunnerRegistrar {
 
     private fun registerModelRunners(
             runnerProviders: Collection<ModelRunnerProvider>,
-            factories: MutableList<Supplier<ModelRunner<*>>>
+            factories: MutableList<Supplier<ModelRunner>>
     ) {
         runnerProviders.forEach { provider ->
             provider.getModelRunners().forEach { runner ->
                 factories.add(Supplier {
-                   instantiateModelRunner(runner) as ModelRunner<*>
+                   instantiateModelRunner(runner) as ModelRunner
                 })
             }
         }
     }
 
-    private fun createModelRunners(): List<ModelRunner<*>> {
+    private fun createModelRunners(): List<ModelRunner> {
         val modelRunnerFactories = modelRunnerFactories.value
-        val runners = ArrayList<ModelRunner<*>>(modelRunnerFactories.size)
+        val runners = ArrayList<ModelRunner>(modelRunnerFactories.size)
 
         if (runners.size > 1)
             throw RuntimeException()

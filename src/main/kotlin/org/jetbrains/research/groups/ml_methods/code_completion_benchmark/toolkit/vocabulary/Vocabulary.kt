@@ -1,16 +1,31 @@
 package org.jetbrains.research.groups.ml_methods.code_completion_benchmark.toolkit.vocabulary
 
-import java.io.File
-
+/**
+ * Interface provides base functionality to translate individual tokens to specified format.
+ *
+ * @param T token representation type
+ */
 interface Vocabulary<T> {
-    fun translateCodePiece(codePiece: Any): Iterable<T>?
+    /**
+     * Translate given token to vocabulary representation.
+     *
+     * @param tokenText token name
+     * @return token representation in the vocabulary
+     */
+    fun translateToken(tokenText: String): T?
 
-    fun translateToken(name: String): T?
+    /**
+     * Translate given token from vocabulary representation to text.
+     *
+     * @param token token representation in the vocabulary
+     * @return translated token
+     */
     fun translateTokenBack(token: T): String?
 
-    fun getVocabularySize(): Int
-
-    //override if is necessary
-    fun loadVocabulary(source: File): Vocabulary<T>? = null
-    fun saveVocabulary() {}
+    /**
+     * Get current vocabulary size.
+     *
+     * @return vocabulary size
+     */
+    fun size(): Int
 }

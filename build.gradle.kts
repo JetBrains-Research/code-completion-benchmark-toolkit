@@ -1,3 +1,4 @@
+import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile
 
 group = "org.jetbrains.research.groups.ml_methods"
@@ -26,8 +27,14 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
 }
 
-tasks.withType<KotlinJvmCompile> {
-    kotlinOptions {
-        jvmTarget = "1.8"
+tasks {
+    withType<KotlinJvmCompile> {
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
+    }
+
+    withType<RunIdeTask> {
+        enabled = false
     }
 }
