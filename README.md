@@ -14,7 +14,7 @@ intellij {
 * Add  `<depends>code-completion-benchmark-toolkit</depends>` line in your plugin.xml.
 ## Quick Start
 ### Deploying model
-[Here] is an example of implementation of all components required to deploy a completion model.
+[Here](https://github.com/ml-in-programming/code-completion-benchmark-plugin/tree/master/src/main/kotlin/org/jetbrains/research/groups/ml_methods/code_completion_benchmark/ngram/completion) is an example of implementation of all components required to deploy a completion model.
 #### Core components
 * ***Model***\
   Your completion model. Since it does not require any interfaces implementation, it can be almost any type.
