@@ -1,4 +1,5 @@
 # code-completion-benchmark-toolkit
+IntelliJ code completion benchmarking toolkit.
 ## Installation
 1. Clone this repo to the root directory of your plugin.
 2. Add `include("code-completion-benchmark-toolkit")` line to your settings.gradle.kts file.
