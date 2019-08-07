@@ -11,26 +11,50 @@ interface ModelRunner {
      * Unique runner identifier.
      */
     val id: String
+
     /**
      * Get code suggestion with the highest probability.
      *
      * @param codePiece code fragment representation for which completion will be generated
      * @return code suggestion with the highest probability
      */
+
     fun getTopCodeSuggestion(codePiece: Any): Prediction?
+
+    /**
+     * Get stringified code suggestion with the highest probability.
+     *
+     * @param codePiece code fragment representation for which completion will be generated
+     * @return code suggestion with the highest probability
+     */
+    fun getTopCodeSuggestionText(codePiece: Any): String?
+
     /**
      * Get N code suggestions with the highest probability.
      *
+     * List is sorted by probability in decreasing order.
+     *
      * @param codePiece code fragment representation for which completion will be generated
      * @param maxNumberOfSuggestions maximum number of completions
-     * @return specified in [maxNumberOfSuggestions] number of completions with the highest probability
+     * @return specified in [maxNumberOfSuggestions] number of stringified completions with the highest probability
      */
     fun getTopNCodeSuggestions(codePiece: Any, maxNumberOfSuggestions: Int = 10): List<Prediction>
+
+    /**
+     * Get N stringified code suggestions with the highest probability.
+     *
+     * List is sorted by probability in decreasing order.
+     *
+     * @param codePiece code fragment representation for which completion will be generated
+     * @param maxNumberOfSuggestions maximum number of completions
+     * @return specified in [maxNumberOfSuggestions] number of stringified completions with the highest probability
+     */
+    fun getTopNCodeSuggestionsText(codePiece: Any, maxNumberOfSuggestions: Int = 10): List<String>
 }
 
 /**
- * This class provides default components as model and vocabulary for code processing.
- * @property
+ * This class provides default components as model and vocabulary for code processing and base [getTopNCodeSuggestionsText]
+ * and [getTopCodeSuggestionText] implementations.
  */
 abstract class AbstractModelRunner : ModelRunner  {
     /**
@@ -42,4 +66,12 @@ abstract class AbstractModelRunner : ModelRunner  {
      * (null, if model in [modelWrapper] does not use vocabulary).
      */
     protected open val vocabularyWrapper: VocabularyWrapper<*, *>? = null
+
+    override fun getTopCodeSuggestionText(codePiece: Any): String {
+        return getTopCodeSuggestion(codePiece).toString()
+    }
+
+    override fun getTopNCodeSuggestionsText(codePiece: Any, maxNumberOfSuggestions: Int): List<String> {
+        return getTopNCodeSuggestions(codePiece, maxNumberOfSuggestions).map { it.toString() }
+    }
 }

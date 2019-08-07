@@ -9,4 +9,8 @@ package org.jetbrains.research.groups.ml_methods.code_completion_benchmark.toolk
 data class Prediction(
         val prediction: String,
         val probability: Double
-)
+) {
+    override fun toString(): String {
+        return prediction
+    }
+}
