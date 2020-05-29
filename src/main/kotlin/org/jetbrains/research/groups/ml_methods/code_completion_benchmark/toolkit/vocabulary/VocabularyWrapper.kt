@@ -8,15 +8,21 @@ import java.io.File
  * @param T token representation type
  * @param V code fragment representation type
  */
-//TODO: make externalizable/serializable?
-interface VocabularyWrapper<T, V> {
+abstract class AbstractVocabularyWrapper<T, V> {
+    /**
+     * Model vocabulary.
+     */
+    protected abstract var vocabulary: Vocabulary<T>
+
     /**
      * Get vocabulary representation for given token.
      *
      * @param token token text
      * @return token representation in the vocabulary
      */
-    fun tokenTextToRepresentation(token: String): T?
+    open fun tokenTextToRepresentation(token: String): T? {
+        return vocabulary.translateToken(token)
+    }
 
     /**
      * Translate given token vocabulary representation to text.
@@ -24,7 +30,9 @@ interface VocabularyWrapper<T, V> {
      * @param token token representation in the vocabulary
      * @return token text
      */
-    fun representationToTokenText(token: T): String?
+    open fun representationToTokenText(token: T): String {
+        return vocabulary.translateTokenBack(token) ?: ""
+    }
 
     /**
      * Get vocabulary representations for given list of tokens.
@@ -32,7 +40,9 @@ interface VocabularyWrapper<T, V> {
      * @param tokens list of text representations of tokens
      * @return token representation in the vocabulary
      */
-    fun tokensListToRepresentations(tokens: List<String>): Iterable<T?>?
+    open fun tokensListToRepresentations(tokens: List<String>): Iterable<T?> {
+        return tokens.map { token -> tokenTextToRepresentation(token) }
+    }
 
     /**
      * Get text for given list of token vocabulary representations.
@@ -40,7 +50,9 @@ interface VocabularyWrapper<T, V> {
      * @param tokens token text
      * @return token representation in the vocabulary
      */
-    fun representationListToTokens(tokens: List<T>): Iterable<String?>?
+    open fun representationListToTokens(tokens: List<T>): Iterable<String?> {
+        return tokens.map { token -> representationToTokenText(token) }
+    }
 
     /**
      * Translate given code fragment to the specified format.
@@ -48,57 +60,27 @@ interface VocabularyWrapper<T, V> {
      * @param codePiece code fragment to translate
      * @return suitable representation of code
      */
-    fun translateCodePiece(codePiece: Any): V?
+    abstract fun translateCodePiece(codePiece: Any): V?
 
     /**
      * Get current vocabulary size.
      *
      * @return vocabulary size
      */
-    fun getVocabularySize(): Int
+    abstract fun getVocabularySize(): Int
+
 
     /**
      * Load vocabulary from file.
      *
      * @param source file from which the vocabulary will be loaded
      */
-    fun loadVocabulary(source: File): Vocabulary<T>?
+    abstract fun loadVocabulary(source: File): Vocabulary<T>
 
     /**
      * Save vocabulary to file.
      *
      * @param target file in which the vocabulary will be saved
      */
-    fun saveVocabulary(target: File)
-}
-
-/**
- * This class wraps vocabulary and provides base implementations of several functions.
- *
- * @param T model type
- */
-abstract class AbstractVocabularyWrapper<T, V, K: Vocabulary<T>>: VocabularyWrapper<T, V> {
-    /**
-     * Model vocabulary.
-     */
-    protected abstract var vocabulary: K
-
-    override fun tokenTextToRepresentation(token: String): T? {
-        return vocabulary.translateToken(token)
-    }
-
-    override fun representationToTokenText(token: T): String {
-        return vocabulary.translateTokenBack(token) ?: ""
-    }
-
-    override fun representationListToTokens(tokens: List<T>): Iterable<String?> {
-        return tokens.map { token -> representationToTokenText(token) }
-    }
-
-    override fun tokensListToRepresentations(tokens: List<String>): Iterable<T?> {
-        return tokens.map { token -> tokenTextToRepresentation(token) }
-    }
-
-    override fun loadVocabulary(source: File): K? = null
-    override fun saveVocabulary(target: File) {}
+    open fun saveVocabulary(target: File) = Unit
 }

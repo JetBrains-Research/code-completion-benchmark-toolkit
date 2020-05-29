@@ -17,6 +17,7 @@ import com.intellij.psi.PsiFile
  *        }
  * Also, you need to register this Factory as an application service extension in plugin.xml.
  */
+@Suppress("UnstableApiUsage")
 abstract class Sorter : CompletionFinalSorter() {
     protected open fun getPsiElementByParameters(parameters: CompletionParameters): PsiElement {
         return parameters.originalPosition ?: return parameters.position
@@ -36,13 +37,14 @@ abstract class Sorter : CompletionFinalSorter() {
     protected abstract fun rankCompletions(
             completions: MutableIterable<LookupElement>,
             parameters: CompletionParameters
-    ): MutableIterable<LookupElement>?
+    ): MutableIterable<LookupElement>
 
-    override fun sort(items: MutableIterable<LookupElement>, parameters: CompletionParameters): MutableIterable<LookupElement> {
-        return rankCompletions(items, parameters) ?: return items
-    }
+    override fun sort(
+        items: MutableIterable<LookupElement>,
+        parameters: CompletionParameters
+    ): MutableIterable<LookupElement> = rankCompletions(items, parameters)
 
-    override fun getRelevanceObjects(elements: MutableIterable<LookupElement>): MutableMap<LookupElement, MutableList<Pair<String, Any>>> {
-        return mutableMapOf()
-    }
+    override fun getRelevanceObjects(
+        elements: MutableIterable<LookupElement>
+    ): MutableMap<LookupElement, MutableList<Pair<String, Any>>> = HashMap()
 }

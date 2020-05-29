@@ -5,14 +5,14 @@ package org.jetbrains.research.groups.ml_methods.code_completion_benchmark.toolk
  *
  * @param T token representation type
  */
-interface Vocabulary<T> {
+abstract class Vocabulary<T> {
     /**
      * Translate given token to vocabulary representation.
      *
      * @param tokenText token name
      * @return token representation in the vocabulary
      */
-    fun translateToken(tokenText: String): T?
+    abstract fun translateToken(tokenText: String): T?
 
     /**
      * Translate given token from vocabulary representation to text.
@@ -20,12 +20,12 @@ interface Vocabulary<T> {
      * @param token token representation in the vocabulary
      * @return translated token
      */
-    fun translateTokenBack(token: T): String?
+    abstract fun translateTokenBack(token: T): String?
 
     /**
      * Get current vocabulary size.
      *
      * @return vocabulary size
      */
-    fun size(): Int
+    abstract fun size(): Int
 }

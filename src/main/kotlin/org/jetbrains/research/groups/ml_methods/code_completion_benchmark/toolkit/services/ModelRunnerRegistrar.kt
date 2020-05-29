@@ -1,28 +1,21 @@
 package org.jetbrains.research.groups.ml_methods.code_completion_benchmark.toolkit.services
 
 import com.intellij.openapi.components.ServiceManager
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.util.NotNullLazyValue
-import com.intellij.util.ReflectionUtil
-
 import org.jetbrains.research.groups.ml_methods.code_completion_benchmark.toolkit.model.ModelRunner
-import org.jetbrains.research.groups.ml_methods.code_completion_benchmark.toolkit.providers.ModelRunnerProvider
-
+import org.slf4j.LoggerFactory
 import java.util.function.Supplier
 
 /**
- * Service that instantiates model runners specified in [ModelRunnerProvider.getModelRunners] implementations.
+ * Service that instantiates model runners specified in [ModelRunner] EPs implementations.
  */
 object ModelRunnerRegistrar {
 
-    private val LOG = Logger.getInstance(
-        "#org.jetbrains.research.groups.ml_methods.code_completion_benchmark.toolkit.services.ModelRunnerRegistrar"
-    )
+    private val LOG = LoggerFactory.getLogger(ModelRunnerRegistrar::class.java)
 
     private val modelRunnerFactories = NotNullLazyValue.createValue {
-        val providers = HashSet<ModelRunnerProvider>()
-        providers.addAll(ModelRunnerProvider.EP_NAME.extensionList)
-
+        val providers = HashSet<ModelRunner>()
+        providers.addAll(ModelRunner.EP_NAME.extensionList)
         val factories = ArrayList<Supplier<ModelRunner>>()
         registerModelRunners(providers, factories)
 
@@ -36,51 +29,41 @@ object ModelRunnerRegistrar {
     }
 
     /**
-     * Use to get required runner by ID.
-     */
-    fun getRunnerById(id: String): ModelRunner? {
-        return getInstance().registeredRunners.find { it.id == id }
-    }
-
-    /**
      * Use to access all available model runners.
      */
-    fun getAvailableRunners(): List<ModelRunner> {
-        return getInstance().registeredRunners
+    fun getCurrentRunner(): ModelRunner {
+        require(registeredRunners.size <= 1) { "Only one model runner should be registered" }
+        return registeredRunners.single()
     }
 
     private fun <T> instantiateModelRunner(runnerClass: Class<T>): T? {
         return try {
-            ReflectionUtil.newInstance(runnerClass)
+            runnerClass.newInstance()
         } catch (e: RuntimeException) {
-            LOG.error(e.cause)
+            LOG.error(e.message)
             null
         }
     }
 
     private fun registerModelRunners(
-            runnerProviders: Collection<ModelRunnerProvider>,
+            runners: Collection<ModelRunner>,
             factories: MutableList<Supplier<ModelRunner>>
     ) {
-        runnerProviders.forEach { provider ->
-            provider.getModelRunners().forEach { runner ->
-                factories.add(Supplier {
-                   instantiateModelRunner(runner) as ModelRunner
-                })
-            }
-        }
+        for (runner in runners)
+            factories.add(Supplier {
+                instantiateModelRunner(runner.javaClass) as ModelRunner
+            })
     }
 
     private fun createModelRunners(): List<ModelRunner> {
-        val modelRunnerFactories = modelRunnerFactories.value
-        val runners = ArrayList<ModelRunner>(modelRunnerFactories.size)
+        val runners = ArrayList<ModelRunner>(modelRunnerFactories.value.size)
 
-        if (runners.size > 1)
-            throw RuntimeException()
+        if (runners.size > 1) error("Only one model runner should be registered")
 
-        modelRunnerFactories.forEach { factory ->
+        for (factory in modelRunnerFactories.value) {
             runners.add(factory.get())
         }
+
         return runners
     }
 }
